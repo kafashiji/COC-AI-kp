@@ -17,6 +17,18 @@
           {{ assistantText || "（助手回复将出现在此处）" }}
         </div>
 
+        <n-space vertical size="small">
+          <n-text depth="3">模型（来自 DeepSeek /v1/models）</n-text>
+          <n-select
+            v-model:value="selectedModel"
+            :options="modelSelectOptions"
+            :loading="modelsLoading"
+            :disabled="streaming"
+            placeholder="选择模型"
+            filterable
+          />
+        </n-space>
+
         <n-input
           v-model:value="userInput"
           type="textarea"
@@ -43,11 +55,13 @@ import {
   NH1,
   NP,
   NInput,
+  NSelect,
   NSpace,
+  NText,
   useMessage,
 } from "naive-ui"
-import { ref } from "vue"
-import { streamAgentChat } from "~/composables/useAgentStream"
+import { computed, onMounted, ref } from "vue"
+import { fetchChatModels, streamAgentChat } from "~/composables/useAgentStream"
 import type { AgentEvent } from "~/types/agent-events"
 
 const config = useRuntimeConfig()
@@ -57,11 +71,55 @@ const userInput = ref("你好，用一两句话自我介绍。")
 const assistantText = ref("")
 const streaming = ref(false)
 const steps = ref<AgentEvent[]>([])
+const selectedModel = ref<string | null>(null)
+const modelsLoading = ref(false)
+const listedModels = ref<{ label: string; value: string }[]>([])
+
+const modelSelectOptions = computed(() => listedModels.value)
+
 let controller: AbortController | null = null
+
+onMounted(async () => {
+  const apiBase = config.public.apiBase as string
+  modelsLoading.value = true
+  try {
+    const data = await fetchChatModels(apiBase)
+    if (data.models.length > 0) {
+      listedModels.value = data.models.map((m) => ({
+        label: m.owned_by ? `${m.id} (${m.owned_by})` : m.id,
+        value: m.id,
+      }))
+      const ids = new Set(data.models.map((m) => m.id))
+      selectedModel.value = ids.has(data.default_model)
+        ? data.default_model
+        : data.models[0]!.id
+    } else {
+      listedModels.value = [
+        {
+          label: data.api_configured
+            ? `${data.default_model}（接口未返回模型列表）`
+            : `${data.default_model}（未配置 DEEPSEEK_API_KEY，仅 .env 默认）`,
+          value: data.default_model,
+        },
+      ]
+      selectedModel.value = data.default_model
+    }
+  } catch (e) {
+    message.error(e instanceof Error ? e.message : String(e))
+    listedModels.value = [{ label: "deepseek-chat（加载失败，请检查后端）", value: "deepseek-chat" }]
+    selectedModel.value = "deepseek-chat"
+  } finally {
+    modelsLoading.value = false
+  }
+})
 
 async function send() {
   const content = userInput.value.trim()
-  if (!content || streaming.value) {
+  const model = selectedModel.value?.trim()
+  if (!content || streaming.value || !model) {
+    if (!model) {
+      message.warning("请先选择模型")
+    }
     return
   }
   assistantText.value = ""
@@ -83,7 +141,7 @@ async function send() {
           message.error(ev.message)
         }
       },
-      controller.signal,
+      { signal: controller.signal, model },
     )
   } catch (e) {
     message.error(e instanceof Error ? e.message : String(e))

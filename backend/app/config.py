@@ -1,10 +1,24 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# uvicorn cwd 为 backend/；用户也常把 .env 放在仓库根目录（与根目录 .env.example 一致）
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+_REPO_ROOT = _BACKEND_ROOT.parent
+_ENV_FILES = tuple(
+    str(p)
+    for p in (_REPO_ROOT / ".env", _BACKEND_ROOT / ".env")
+    if p.is_file()
+)
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        **({"env_file": _ENV_FILES} if _ENV_FILES else {}),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"
