@@ -142,10 +142,11 @@ RAG 工具调用（按需）
 
 | 分层 | 技术 |
 |---|---|
-| 容器化 | Docker + Docker Compose |
+| 本地开发 | **默认不用 Docker**：本机安装 Python / Node、PostgreSQL（需要 RAG 时再配 pgvector）；Phoenix 按需本机安装 |
+| 容器化（可选） | `deploy/docker-compose.yml`：PostgreSQL（pgvector）+ Phoenix；多人阶段可再引入 Redis 等同文件扩展 |
 | 反向代理 | Caddy（自动 HTTPS） |
 | CI | GitHub Actions |
-| 部署 | 自托管 VPS / Vercel（前端）+ Fly.io（后端） |
+| 部署 | 自托管 VPS / Vercel（前端）+ Fly.io（后端）；生产环境再按需镜像化 |
 
 ---
 
@@ -220,7 +221,7 @@ coc-ai-keeper/
 │   ├── alembic/
 │   ├── tests/
 │   ├── pyproject.toml          # uv
-│   └── Dockerfile
+│   └── Dockerfile              # 可选；阶段一再补
 ├── frontend/                    # Nuxt 3 + Vue 3
 │   ├── components/
 │   │   ├── chat/
@@ -240,7 +241,9 @@ coc-ai-keeper/
 │   └── nuxt.config.ts
 ├── docs/
 │   └── PLAN.md
-├── docker-compose.yml           # PG + pgvector + Redis + Phoenix
+├── deploy/
+│   └── docker-compose.yml       # 可选：PG + pgvector + Phoenix（本地默认不用）
+├── .env.example
 └── README.md
 ```
 
@@ -252,7 +255,7 @@ coc-ai-keeper/
 
 | 周次 | 目标 | 验收 |
 |---|---|---|
-| Week 1 | 工程骨架：Docker Compose（PG + Phoenix）+ FastAPI hello + Nuxt 3 hello + DeepSeek 流式 SSE 打通 | 浏览器能与 DeepSeek 流式对话 |
+| Week 1 | 工程骨架：本地 Python/Node + FastAPI + Nuxt 3 + DeepSeek 流式 SSE；PG/pgvector 与 Phoenix 按需本地安装，**可选** `deploy/docker-compose.yml` | 浏览器能与 DeepSeek 流式对话 |
 | Week 2 | 实现 9 个核心 skill + LlamaIndex Agent 接通 + Phoenix 能看思维链 | AI 能调 `roll_dice` 并把结果叙述出来 |
 | Week 3 | 规则书 docx 解析 → pgvector 入库 → `lookup_rulebook` RAG 跑通 + 人物卡 xlsx 导入 | AI 能查冷门规则、能读玩家人物卡 |
 | Week 4 | 三层记忆 + 模组结构化（先手动一个简单短模组） + 跑通一场完整短团（30–60 分钟） | 一场短团测试录像 |

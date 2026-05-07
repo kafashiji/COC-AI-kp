@@ -1,0 +1,13 @@
+{
+  "name": "coc-ai-keeper",
+  "private": true,
+  "description": "根目录脚本：并行或单独启动 backend / frontend",
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend -c cyan,magenta \"node scripts/run-backend.mjs\" \"npm run dev --prefix frontend\"",
+    "dev:backend": "node scripts/run-backend.mjs",
+    "dev:frontend": "npm run dev --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

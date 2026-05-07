@@ -1,0 +1,55 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-msedge",
+      "request": "launch",
+      "name": "1️⃣ Edge（独立配置目录，优先）",
+      "url": "http://127.0.0.1:3000",
+      "webRoot": "${workspaceFolder}/frontend",
+      "runtimeExecutable": "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+      "userDataDir": "${workspaceFolder}/.edge-debug-profile",
+      "sourceMapPathOverrides": {
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
+      "type": "pwa-msedge",
+      "request": "launch",
+      "name": "2️⃣ Edge（x86 路径 + 独立目录）",
+      "url": "http://127.0.0.1:3000",
+      "webRoot": "${workspaceFolder}/frontend",
+      "runtimeExecutable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "userDataDir": "${workspaceFolder}/.edge-debug-profile",
+      "sourceMapPathOverrides": {
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
+      "type": "pwa-msedge",
+      "request": "attach",
+      "name": "3️⃣ 附加到 Edge（先运行 scripts/start-edge-debug.bat）",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}/frontend",
+      "urlFilter": "http://127.0.0.1:3000/*",
+      "sourceMapPathOverrides": {
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
+      "type": "pwa-msedge",
+      "request": "launch",
+      "name": "4️⃣ Edge（不写浏览器路径，自动解析）",
+      "url": "http://127.0.0.1:3000",
+      "webRoot": "${workspaceFolder}/frontend",
+      "userDataDir": "${workspaceFolder}/.edge-debug-profile",
+      "sourceMapPathOverrides": {
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      }
+    }
+  ]
+}
